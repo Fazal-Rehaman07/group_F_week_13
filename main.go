@@ -89,6 +89,9 @@ func main() {
 	// Set up HTTP routes
 	http.HandleFunc("/current-time", currentTimeHandler)
 
+	fs := http.FileServer(http.Dir("./templates"))
+	http.Handle("/", fs)
+
 	// Start the server
 	port := ":8080"
 	fmt.Printf("Server is running on port %s\n", port)

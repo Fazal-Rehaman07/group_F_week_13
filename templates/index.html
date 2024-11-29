@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Time Logger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333333;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #6C63FF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5a55d4;
+        }
+
+        .output {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+
+        .running-time {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Current Time Logger</h1>
+        <form id="timeForm">
+            <input type="text" id="username" placeholder="Enter your username" required>
+            <button type="submit">Get Current Time</button>
+        </form>
+        <div class="output" id="output"></div>
+        <div class="error" id="error"></div>
+        <div class="running-time" id="running-time">Running time: 0s</div>
+    </div>
+
+    <script>
+        // Track the page load time to calculate the running time
+        let startTime = Date.now();
+
+        // Function to update the running time every second
+        setInterval(() => {
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000); // time in seconds
+            document.getElementById("running-time").textContent = `Running time: ${elapsedTime}s`;
+        }, 1000); // Update every second
+
+        document.getElementById("timeForm").addEventListener("submit", async (event) => {
+            event.preventDefault(); // Prevent form submission
+
+            // Clear previous output and errors
+            document.getElementById("output").textContent = "";
+            document.getElementById("error").textContent = "";
+
+            const username = document.getElementById("username").value.trim();
+            if (!username) {
+                document.getElementById("error").textContent = "Username is required.";
+                return;
+            }
+
+            try {
+                // Fetch the client IP address
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const clientIP = ipData.ip;
+
+                // Send the username and IP to the backend
+                const response = await fetch("http://localhost:8080/current-time", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, ip_address: clientIP }),
+                });
+
+                // Check if the response is successful
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Error: ${errorMessage}`);
+                }
+
+                const data = await response.json();
+                const { current_time, ip_address } = data;
+
+                // Display the result
+                document.getElementById("output").innerHTML = `
+                    Hello, <strong>${username}</strong>!<br>
+                    Your current time in Toronto is: <strong>${current_time}</strong><br>
+                    Your IP Address is: <strong>${ip_address}</strong>
+                `;
+            } catch (error) {
+                // Display error message
+                document.getElementById("error").textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>
