@@ -5,7 +5,7 @@
 The Go application is a simple web service that interacts with a MySQL database to log user requests. The application exposes two primary endpoints:
 
 - **`/current-time`**: Logs the current time (in the Toronto time zone), along with the username and IP address, into a MySQL database.
-- **`/getlogs`**: Retrieves and returns all the logs from the MySQL database.
+- **`/logs`**: Retrieves and returns all the logs from the MySQL database.
 
 The application uses the `github.com/go-sql-driver/mysql` driver to connect to the MySQL database and perform SQL queries.
 
