@@ -20,7 +20,6 @@ Key parts of the application:
 
 ### **Prerequisites**
 - Docker and Docker Compose installed on your system.
-- A Docker Hub (or other registry) account if pushing images.
 
 ### **Step-by-Step Setup:**
 
