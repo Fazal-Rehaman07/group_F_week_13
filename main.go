@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql" // MySQL driver
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
@@ -81,6 +81,59 @@ func currentTimeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Handler for /logs endpoint to display stored logs
+func logsHandler(w http.ResponseWriter, r *http.Request) {
+	// Only allow GET requests
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Query to fetch logs from the database
+	rows, err := db.Query("SELECT id, logged_time, username, ip_address FROM time_log ORDER BY logged_time DESC")
+	if err != nil {
+		http.Error(w, "Error retrieving logs from database", http.StatusInternalServerError)
+		log.Printf("Error retrieving logs from database: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	var logs []map[string]interface{}
+	for rows.Next() {
+		var id int
+		var loggedTime string
+		var username, ipAddress string
+
+		if err := rows.Scan(&id, &loggedTime, &username, &ipAddress); err != nil {
+			http.Error(w, "Error scanning log data", http.StatusInternalServerError)
+			log.Printf("Error scanning log data: %v", err)
+			return
+		}
+
+		log := map[string]interface{}{
+			"id":          id,
+			"logged_time": loggedTime,
+			"username":    username,
+			"ip_address":  ipAddress,
+		}
+		logs = append(logs, log)
+	}
+
+	// Check for errors during iteration
+	if err := rows.Err(); err != nil {
+		http.Error(w, "Error processing logs", http.StatusInternalServerError)
+		log.Printf("Error processing logs: %v", err)
+		return
+	}
+
+	// Respond with logs as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(logs); err != nil {
+		http.Error(w, "Error encoding logs to JSON", http.StatusInternalServerError)
+		log.Printf("Error encoding logs to JSON: %v", err)
+	}
+}
+
 func main() {
 	// Initialize the database
 	initDatabase()
@@ -88,9 +141,15 @@ func main() {
 
 	// Set up HTTP routes
 	http.HandleFunc("/current-time", currentTimeHandler)
+	http.HandleFunc("/getlogs", logsHandler)
 
-	fs := http.FileServer(http.Dir("./templates"))
+	fs := http.FileServer(http.Dir("./templates/"))
 	http.Handle("/", fs)
+
+	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+		// Serve the logs.html file when visiting localhost:8080/logs
+		http.ServeFile(w, r, "./templates/logs.html")
+	})
 
 	// Start the server
 	port := ":8080"

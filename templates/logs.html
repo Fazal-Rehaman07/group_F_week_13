@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            background: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #6C63FF;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover td {
+            background-color: #e0e0e0;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .error {
+            color: red;
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Log Entries</h1>
+        <div class="loading" id="loading"></div>
+        <div class="error" id="error"></div>
+        <table id="logsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Logged Time</th>
+                    <th>Username</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Logs will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fetch logs from the backend and populate the table
+        async function fetchLogs() {
+            try {
+                const response = await fetch("http://localhost:8080/getlogs");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch logs");
+                }
+                const logs = await response.json();
+
+                // Hide the loading message
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("logsTable").style.display = "table"; // Show table
+
+                const tableBody = document.querySelector("#logsTable tbody");
+
+                // Populate the table with logs
+                logs.forEach(log => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${log.id}</td>
+                        <td>${new Date(log.logged_time).toLocaleString()}</td>
+                        <td>${log.username}</td>
+                        <td>${log.ip_address}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("error").textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Call fetchLogs on page load
+        window.onload = fetchLogs;
+    </script>
+</body>
+</html>
