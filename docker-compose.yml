@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: admin@4321 # Set the root password
+      MYSQL_DATABASE: UserData       # Create the database on startup
+      MYSQL_USER: admin              # Create a non-root user
+      MYSQL_PASSWORD: admin@4321     # Password for the non-root user
+    ports:
+      - "3306:3306"                  # Expose MySQL on port 3306
+    volumes:
+      - mysql_data:/var/lib/mysql    # Persist database data
+
+  goapp:
+    build:
+      context: .                     # The directory where Dockerfile is located
+    container_name: goApp_container
+    ports:
+      - "8080:8080"                  # Expose the app on port 8080
+    depends_on:
+      - mysql                        # Ensure the MySQL container starts first
+    environment:
+      DB_HOST: mysql                 # MySQL service name (DNS resolution via Docker network)
+      DB_PORT: 3306                  # MySQL port
+      DB_USER: admin                 # MySQL user
+      DB_PASSWORD: admin@4321        # MySQL password
+      DB_NAME: UserData              # MySQL database name
