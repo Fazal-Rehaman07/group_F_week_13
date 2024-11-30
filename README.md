@@ -25,7 +25,7 @@ Key parts of the application:
 
 1. **Clone the Repository** (if not already done):
    ```bash
-   git clone https://github.com/your-repository/go-app.git
+   git clone https://github.com/Fazal-Rehaman07/group_F_week_13.git
    cd go-app
    ```
 
