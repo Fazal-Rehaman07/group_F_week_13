@@ -33,12 +33,10 @@ Key parts of the application:
    Update the `docker-compose.yml` file in the project with your choice of Username and Password:
 
    ```yaml
-   version: '3.8'
-
    services:
      mysql:
-       image: mysql:8.0
-       container_name: mysql_container
+       image: mysql:latest
+       container_name: mysql-container
        restart: always
        environment:
          MYSQL_ROOT_PASSWORD: admin@4321
@@ -48,26 +46,24 @@ Key parts of the application:
        ports:
          - "3306:3306"
        volumes:
-         - mysql_data:/var/lib/mysql
-
-     goapp:
+         - ./sql-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+       
+   
+     backend:
        build:
-         context: .
-       container_name: go_app_container
+         context: .                     # The directory where Dockerfile is located
+       container_name: goApp_container
        restart: always
        ports:
-         - "8080:8080"
-       depends_on:
-         - mysql
+         - "8080:8080"                  # Expose the app on port 8080
        environment:
-         DB_HOST: mysql
-         DB_PORT: 3306
-         DB_USER: admin
-         DB_PASSWORD: admin@4321
-         DB_NAME: UserData
-
-   volumes:
-     mysql_data:
+         DB_HOST: mysql                 # MySQL service name (DNS resolution via Docker network)
+         DB_PORT: 3306                  # MySQL port
+         DB_USER: root                  # MySQL user
+         DB_PASSWORD: admin@4321        # MySQL password
+         DB_NAME: UserData              # MySQL database name
+       depends_on:
+         - mysql                        # Ensure the MySQL container starts first
    ```
 
 3. **Build and Start the Containers**:
