@@ -68,10 +68,11 @@
             font-size: 14px;
         }
 
-        .running-time {
+        .clock {
+            font-size: 24px;
+            font-weight: bold;
             margin-top: 20px;
-            font-size: 16px;
-            color: #555;
+            color: #333;
         }
     </style>
 </head>
@@ -84,19 +85,23 @@
         </form>
         <div class="output" id="output"></div>
         <div class="error" id="error"></div>
-        <div class="running-time" id="running-time">Running time: 0s</div>
+        <!-- Display the real-time clock here -->
+        <div class="clock" id="clock"></div>
     </div>
 
     <script>
-        // Track the page load time to calculate the running time
-        let startTime = Date.now();
+        // Function to fetch and display the current time in real-time
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
 
-        // Function to update the running time every second
-        setInterval(() => {
-            const elapsedTime = Math.floor((Date.now() - startTime) / 1000); // time in seconds
-            document.getElementById("running-time").textContent = `Running time: ${elapsedTime}s`;
-        }, 1000); // Update every second
+            // Format the time
+            return `${hours}:${minutes}:${seconds}`;
+        }
 
+        // Handle form submission
         document.getElementById("timeForm").addEventListener("submit", async (event) => {
             event.preventDefault(); // Prevent form submission
 
@@ -135,9 +140,16 @@
                 // Display the result
                 document.getElementById("output").innerHTML = `
                     Hello, <strong>${username}</strong>!<br>
-                    Your current time in Toronto is: <strong>${current_time}</strong><br>
-                    Your IP Address is: <strong>${ip_address}</strong>
-                `;
+                    Your IP Address is: <strong>${ip_address}</strong><br>`;
+
+                // Start updating the clock every second
+                setInterval(() => {
+                    const time = updateClock(); // Get the updated time every second
+                    document.getElementById('clock').textContent = time; // Update the clock on the page
+                }, 1000);
+
+                // Initial call to set the clock immediately after form submission
+                document.getElementById('clock').textContent = updateClock();
             } catch (error) {
                 // Display error message
                 document.getElementById("error").textContent = error.message;
