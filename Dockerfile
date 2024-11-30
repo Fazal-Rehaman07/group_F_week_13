@@ -18,6 +18,9 @@ RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o main .
 # Final stage
 FROM alpine:latest
 
+# Install tzdata to ensure time zone data is available
+RUN apk update && apk add --no-cache tzdata
+
 WORKDIR /server
 
 # Copy the Pre-built binary file from the previous stage
