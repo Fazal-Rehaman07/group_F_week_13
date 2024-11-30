@@ -29,8 +29,8 @@ Key parts of the application:
    cd go-app
    ```
 
-2. **Create Docker Compose File**:
-   Make sure you have the `docker-compose.yml` file in your project directory. Here's an example:
+2. **Update Docker Compose File**:
+   Update the `docker-compose.yml` file in the project with your choice of Username and Password:
 
    ```yaml
    version: '3.8'
@@ -155,9 +155,10 @@ This should display the `time_log` table in the list.
   docker-compose logs
   ```
 
-- **Run the Go Application Container Manually** (if you want to run the Go app container without Compose):
+- **Run the Go Application  Manually** (if you want to run the Go app container without Compose):
   ```bash
-  docker run -p 8080:8080 --env DB_HOST=mysql --env DB_USER=admin --env DB_PASSWORD=admin@4321 --env DB_NAME=UserData go_app_container
+  go run main.go //this is your localhost server
+  docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=admin@4321 -e MYSQL_DATABASE=UserData -e MYSQL_USER=admin -e MYSQL_PASSWORD=admin@4321 -p 3306:3306 -d mysql:lates
   ```
 
 ---
